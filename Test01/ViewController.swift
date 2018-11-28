@@ -1,13 +1,13 @@
 //
 //  ViewController.swift
-//  Test01
 //
-//  Created by Tony Tong on 2018-11-27.
+//  Created by Tony on 2018-11-27.
 //  Copyright © 2018 TT. All rights reserved.
 //
 
 import UIKit
 
+//defining a structure to store meme definition
 struct Meme {
     var topText = ""
     var bottomText = ""
@@ -17,6 +17,10 @@ struct Meme {
 
 class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
+    ///////////////////////////////////////////////////////
+    // class variables below
+    ///////////////////////////////////////////////////////
+    
     @IBOutlet weak var topTextField: UITextField!
     @IBOutlet weak var bottomTextField: UITextField!
     @IBOutlet weak var imageView: UIImageView!
@@ -24,6 +28,11 @@ class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerContro
     @IBOutlet weak var topToolbar: UIToolbar!
     @IBOutlet weak var bottomToolbar: UIToolbar!
     @IBOutlet weak var actionButton: UIBarButtonItem!
+    var activeTextField:UITextField! //to identify which text field is being edited
+
+    ///////////////////////////////////////////////////////
+    // class constants below
+    ///////////////////////////////////////////////////////
     
     let imagePicker = UIImagePickerController()
     let memeTextAttributes:[NSAttributedString.Key: Any] = [
@@ -33,10 +42,13 @@ class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerContro
         NSAttributedString.Key(rawValue: NSAttributedString.Key.strokeWidth.rawValue): -2.0]
     let topTextFieldDefaultText = "TOP"
     let bottomTextFieldDefaultText = "BOTTOM"
-    let topTextFieldTag = 1001
-    let bottomTextFieldTag = 1002
-    var activeTextField:UITextField!
+    let topTextFieldTag = 1001 //id for top text field
+    let bottomTextFieldTag = 1002 //id for bottom text field
 
+    ///////////////////////////////////////////////////////
+    // class methods below
+    ///////////////////////////////////////////////////////
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -61,7 +73,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerContro
     }
 
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        textField.resignFirstResponder()
+        textField.resignFirstResponder() //dismiss keyboard
         setAttributedText(textField: textField, text: textField.text!)
         return true
     }
@@ -79,24 +91,25 @@ class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerContro
     }
     
     @IBAction func actionButtonTouched(_ sender: Any) {
-        let memeObj = Meme(
-            topText: topTextField.text!,
-            bottomText: bottomTextField.text!,
-            originalImage: imageView.image,
-            memedImage: generateMemedImage()
-        )
-        let avc = UIActivityViewController(activityItems: [memeObj.memedImage], applicationActivities: nil)
+        
+        let memedImage = generateMemedImage()
+        
+        let avc = UIActivityViewController(activityItems: [memedImage], applicationActivities: nil)
+        
+        //save the meme only if user did not cancel out of the activity view controller
         avc.completionWithItemsHandler = {(activity, completed, items, error) in
             if (completed) {
                 print("saving meme")
-                self.saveMeme(memeObj.memedImage!)
+                self.saveMeme(memedImage)
             }
         }
+        
+        //show the stock activity view controller
         present(avc, animated: true)
     }
     
     func saveMeme(_ image : UIImage) {
-        // Create the meme
+        // store the meme in a Meme structure
         let meme = Meme(topText: topTextField.text!, bottomText: bottomTextField.text!, originalImage: imageView.image!, memedImage: image)
     }
     
@@ -122,6 +135,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerContro
         bottomToolbar.isHidden = !makeToolbarsVisible
     }
     
+    //return UI elements to the default starting state
+    //this function can be called multiple times with no issues
     func resetScreen() {
         setAttributedText(textField: topTextField, text: topTextFieldDefaultText)
         setAttributedText(textField: bottomTextField, text: bottomTextFieldDefaultText)
@@ -129,16 +144,22 @@ class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerContro
         actionButton.isEnabled = false
     }
     
+    //launch image picker and instruct it to pick image from the specified source (e.g. photo album, camera, etc)
     func launchImagePicker(_ sourceType : UIImagePickerController.SourceType) {
         imagePicker.sourceType = sourceType
         present(imagePicker, animated:true)
     }
     
     func textFieldDidBeginEditing(_ textField: UITextField) {
+        
+        //identify which text field was touched
         activeTextField = textField
+        
+        //clear out the text field only if the text within is the default text
         if textField.tag == topTextFieldTag && textField.text?.uppercased() == topTextFieldDefaultText {
             textField.text = ""
         }
+        //clear out the text field only if the text within is the default text
         if textField.tag == bottomTextFieldTag && textField.text?.uppercased() == bottomTextFieldDefaultText {
             textField.text = ""
         }
@@ -159,6 +180,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerContro
     }
     
     func configCameraButton() {
+        //disable camera button if the device does not have a camera
         cameraButton.isEnabled = UIImagePickerController.isSourceTypeAvailable(.camera)
     }
     
@@ -170,8 +192,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerContro
         }
         dismiss(animated: true, completion: nil)
     }
-
-    ////////
+    
     func subscribeToKeyboardNotifications() {
         
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
@@ -187,12 +208,14 @@ class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerContro
     @objc func keyboardWillShow(_ notification:Notification) {
         if let tf = activeTextField {
             if tf.tag == bottomTextFieldTag {
+                //move the view up only when the bottom text field is touched
                 view.frame.origin.y -= getKeyboardHeight(notification)
             }
         }
     }
     
     @objc func keyboardWillHide(_ notification:Notification) {
+        //return view to default vertical position after keyboard is dismissed
         view.frame.origin.y = 0
     }
     

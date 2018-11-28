@@ -1,8 +1,7 @@
 //
 //  AppDelegate.swift
-//  Test01
 //
-//  Created by Tony Tong on 2018-11-27.
+//  Created by Tony on 2018-11-27.
 //  Copyright © 2018 TT. All rights reserved.
 //
 
