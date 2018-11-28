@@ -41,7 +41,11 @@
                                 <items>
                                     <barButtonItem systemItem="action" id="Qyw-rO-XtC"/>
                                     <barButtonItem systemItem="flexibleSpace" id="pxU-dB-0aB"/>
-                                    <barButtonItem systemItem="cancel" id="htz-oN-Qo8"/>
+                                    <barButtonItem systemItem="cancel" id="htz-oN-Qo8">
+                                        <connections>
+                                            <action selector="cancelButtonTouched:" destination="BYZ-38-t0r" id="zLg-fE-dEv"/>
+                                        </connections>
+                                    </barButtonItem>
                                 </items>
                             </toolbar>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="joM-bg-B5H">

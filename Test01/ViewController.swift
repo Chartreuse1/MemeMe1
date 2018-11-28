@@ -15,14 +15,18 @@ class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerContro
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var cameraButton: UIBarButtonItem!
     
-    var activeTextField:UITextField!
     let imagePicker = UIImagePickerController()
     let memeTextAttributes:[NSAttributedString.Key: Any] = [
         NSAttributedString.Key(rawValue: NSAttributedString.Key.strokeColor.rawValue): UIColor.black,
         NSAttributedString.Key(rawValue: NSAttributedString.Key.foregroundColor.rawValue): UIColor.white,
         NSAttributedString.Key(rawValue: NSAttributedString.Key.font.rawValue): UIFont(name: "HelveticaNeue-CondensedBlack", size: 40)!,
         NSAttributedString.Key(rawValue: NSAttributedString.Key.strokeWidth.rawValue): -2.0]
-    
+    let topTextFieldDefaultText = "TOP"
+    let bottomTextFieldDefaultText = "BOTTOM"
+    let topTextFieldTag = 1001
+    let bottomTextFieldTag = 1002
+    var activeTextField:UITextField!
+
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
@@ -30,6 +34,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerContro
         configTextField(bottomTextField)
         configUIImagePickerController()
         configCameraButton()
+        resetScreen()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -44,7 +49,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerContro
 
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
-        textField.attributedText =  NSAttributedString(string: textField.text!, attributes:memeTextAttributes)
+        setAttributedText(textField: textField, text: textField.text!)
         return true
     }
     
@@ -56,6 +61,16 @@ class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerContro
         launchImagePicker(UIImagePickerController.SourceType.camera)
     }
     
+    @IBAction func cancelButtonTouched(_ sender: Any) {
+        resetScreen()
+    }
+    
+    func resetScreen() {
+        setAttributedText(textField: topTextField, text: topTextFieldDefaultText)
+        setAttributedText(textField: bottomTextField, text: bottomTextFieldDefaultText)
+        imageView.image = nil
+    }
+    
     func launchImagePicker(_ sourceType : UIImagePickerController.SourceType) {
         imagePicker.sourceType = sourceType
         present(imagePicker, animated:true)
@@ -63,18 +78,21 @@ class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerContro
     
     func textFieldDidBeginEditing(_ textField: UITextField) {
         activeTextField = textField
-        if textField.tag == 1001 && textField.text?.uppercased() == "TOP" {
+        if textField.tag == topTextFieldTag && textField.text?.uppercased() == topTextFieldDefaultText {
             textField.text = ""
         }
-        if textField.tag == 1002 && textField.text?.uppercased() == "BOTTOM" {
+        if textField.tag == bottomTextFieldTag && textField.text?.uppercased() == bottomTextFieldDefaultText {
             textField.text = ""
         }
     }
     
     func configTextField(_ textField:UITextField) {
-        textField.attributedText = NSAttributedString(string: textField.text!, attributes:memeTextAttributes)
         textField.delegate = self
         textField.adjustsFontSizeToFitWidth = true
+    }
+    
+    func setAttributedText(textField:UITextField, text:String) {
+        textField.attributedText = NSAttributedString(string: text, attributes:memeTextAttributes)
     }
     
     func configUIImagePickerController(){
@@ -109,7 +127,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerContro
     
     @objc func keyboardWillShow(_ notification:Notification) {
         if let tf = activeTextField {
-            if tf.tag == 1002 {
+            if tf.tag == bottomTextFieldTag {
                 view.frame.origin.y -= getKeyboardHeight(notification)
             }
         }
