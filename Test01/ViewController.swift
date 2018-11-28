@@ -8,12 +8,22 @@
 
 import UIKit
 
+struct Meme {
+    var topText = ""
+    var bottomText = ""
+    var originalImage : UIImage?
+    var memedImage : UIImage?
+}
+
 class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
     @IBOutlet weak var topTextField: UITextField!
     @IBOutlet weak var bottomTextField: UITextField!
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var cameraButton: UIBarButtonItem!
+    @IBOutlet weak var topToolbar: UIToolbar!
+    @IBOutlet weak var bottomToolbar: UIToolbar!
+    @IBOutlet weak var actionButton: UIBarButtonItem!
     
     let imagePicker = UIImagePickerController()
     let memeTextAttributes:[NSAttributedString.Key: Any] = [
@@ -29,11 +39,14 @@ class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerContro
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+
+        //these tasks need only be executed (i.e. set up) once
         configTextField(topTextField)
         configTextField(bottomTextField)
         configUIImagePickerController()
         configCameraButton()
+        
+        //these tasks can be executed as needed
         resetScreen()
     }
     
@@ -65,10 +78,44 @@ class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerContro
         resetScreen()
     }
     
+    @IBAction func actionButtonTouched(_ sender: Any) {
+        let memeObj = Meme(
+            topText: topTextField.text!,
+            bottomText: bottomTextField.text!,
+            originalImage: imageView.image,
+            memedImage: generateMemedImage()
+        )
+        let avc = UIActivityViewController(activityItems: [memeObj.memedImage], applicationActivities: nil)
+        present(avc, animated: true)
+    }
+    
+    func generateMemedImage() -> UIImage {
+        
+        // Hide toolbar and navbar
+        showToolbars(false)
+        
+        // Render view to an image
+        UIGraphicsBeginImageContext(self.view.frame.size)
+        view.drawHierarchy(in: self.view.frame, afterScreenUpdates: true)
+        let memedImage:UIImage = UIGraphicsGetImageFromCurrentImageContext()!
+        UIGraphicsEndImageContext()
+        
+        // Show toolbar and navbar
+        showToolbars(true)
+        
+        return memedImage
+    }
+    
+    func showToolbars(_ makeToolbarsVisible : Bool) {
+        topToolbar.isHidden = !makeToolbarsVisible
+        bottomToolbar.isHidden = !makeToolbarsVisible
+    }
+    
     func resetScreen() {
         setAttributedText(textField: topTextField, text: topTextFieldDefaultText)
         setAttributedText(textField: bottomTextField, text: bottomTextFieldDefaultText)
         imageView.image = nil
+        actionButton.isEnabled = false
     }
     
     func launchImagePicker(_ sourceType : UIImagePickerController.SourceType) {
@@ -108,6 +155,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerContro
         if let pickedImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
             imageView.contentMode = .scaleAspectFit
             imageView.image = pickedImage
+            actionButton.isEnabled = true //enable the share button only when there actually is an image
         }
         dismiss(animated: true, completion: nil)
     }
