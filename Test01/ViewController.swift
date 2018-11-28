@@ -86,7 +86,18 @@ class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerContro
             memedImage: generateMemedImage()
         )
         let avc = UIActivityViewController(activityItems: [memeObj.memedImage], applicationActivities: nil)
+        avc.completionWithItemsHandler = {(activity, completed, items, error) in
+            if (completed) {
+                print("saving meme")
+                self.saveMeme(memeObj.memedImage!)
+            }
+        }
         present(avc, animated: true)
+    }
+    
+    func saveMeme(_ image : UIImage) {
+        // Create the meme
+        let meme = Meme(topText: topTextField.text!, bottomText: bottomTextField.text!, originalImage: imageView.image!, memedImage: image)
     }
     
     func generateMemedImage() -> UIImage {
