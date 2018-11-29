@@ -30,6 +30,7 @@ class MainScreenViewController: UIViewController, UITextFieldDelegate, UIImagePi
     @IBOutlet weak var actionButton: UIBarButtonItem!
     var activeTextField:UITextField! //to identify which text field is being edited
 
+
     ///////////////////////////////////////////////////////
     // class constants below
     ///////////////////////////////////////////////////////
@@ -168,6 +169,8 @@ class MainScreenViewController: UIViewController, UITextFieldDelegate, UIImagePi
     func configTextField(_ textField:UITextField) {
         textField.delegate = self
         textField.adjustsFontSizeToFitWidth = true
+        textField.defaultTextAttributes = memeTextAttributes
+        textField.textAlignment = .center
     }
     
     func setAttributedText(textField:UITextField, text:String) {
