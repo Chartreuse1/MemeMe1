@@ -29,7 +29,8 @@ class MainScreenViewController: UIViewController, UITextFieldDelegate, UIImagePi
     @IBOutlet weak var bottomToolbar: UIToolbar!
     @IBOutlet weak var actionButton: UIBarButtonItem!
     var activeTextField:UITextField! //to identify which text field is being edited
-
+    var topTextVisited = false
+    var bottomTextVisited = false
 
     ///////////////////////////////////////////////////////
     // class constants below
@@ -75,7 +76,6 @@ class MainScreenViewController: UIViewController, UITextFieldDelegate, UIImagePi
 
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder() //dismiss keyboard
-        setAttributedText(textField: textField, text: textField.text!)
         return true
     }
     
@@ -136,13 +136,15 @@ class MainScreenViewController: UIViewController, UITextFieldDelegate, UIImagePi
         bottomToolbar.isHidden = !makeToolbarsVisible
     }
     
-    //return UI elements to the default starting state
+    //return UI elements to the default starting state just like when app was run for the first time
     //this function can be called multiple times with no issues
     func resetScreen() {
         setAttributedText(textField: topTextField, text: topTextFieldDefaultText)
         setAttributedText(textField: bottomTextField, text: bottomTextFieldDefaultText)
         imageView.image = nil
         actionButton.isEnabled = false
+        topTextVisited = false
+        bottomTextVisited = false
     }
     
     //launch image picker and instruct it to pick image from the specified source (e.g. photo album, camera, etc)
@@ -157,12 +159,14 @@ class MainScreenViewController: UIViewController, UITextFieldDelegate, UIImagePi
         activeTextField = textField
         
         //clear out the text field only if the text within is the default text
-        if textField.tag == topTextFieldTag && textField.text?.uppercased() == topTextFieldDefaultText {
+        if textField.tag == topTextFieldTag && !topTextVisited {
             textField.text = ""
+            topTextVisited = true
         }
         //clear out the text field only if the text within is the default text
-        if textField.tag == bottomTextFieldTag && textField.text?.uppercased() == bottomTextFieldDefaultText {
+        if textField.tag == bottomTextFieldTag && !bottomTextVisited {
             textField.text = ""
+            bottomTextVisited = true
         }
     }
     
@@ -212,7 +216,7 @@ class MainScreenViewController: UIViewController, UITextFieldDelegate, UIImagePi
         if let tf = activeTextField {
             if tf.tag == bottomTextFieldTag {
                 //move the view up only when the bottom text field is touched
-                view.frame.origin.y -= getKeyboardHeight(notification)
+                view.frame.origin.y = -getKeyboardHeight(notification)
             }
         }
     }
