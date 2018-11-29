@@ -168,8 +168,6 @@ class MainScreenViewController: UIViewController, UITextFieldDelegate, UIImagePi
     func configTextField(_ textField:UITextField) {
         textField.delegate = self
         textField.adjustsFontSizeToFitWidth = true
-        textField.defaultTextAttributes = memeTextAttributes
-        textField.textAlignment = .center
     }
     
     func setAttributedText(textField:UITextField, text:String) {
@@ -211,7 +209,7 @@ class MainScreenViewController: UIViewController, UITextFieldDelegate, UIImagePi
         if let tf = activeTextField {
             if tf.tag == bottomTextFieldTag {
                 //move the view up only when the bottom text field is touched
-                view.frame.origin.y = -getKeyboardHeight(notification)
+                view.frame.origin.y -= getKeyboardHeight(notification)
             }
         }
     }
